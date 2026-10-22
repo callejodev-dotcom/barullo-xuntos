@@ -44,7 +44,7 @@ endif()
 # (../barullo-xuno, ../barullo7fm, ../barullofm) úsanse eses; se non, descárganse. Tamén
 # -DXUNTOS_MOTORES=<cartafol cos tres>.
 set(XUNTOS_XUNO_VERSION "74334b0370b2c88f196f5be6b531e0a6bbfdd551")   # Barullo Xuno 0.1.0 (main, aínda sen etiqueta)
-set(XUNTOS_7FM_VERSION "v0.2.0")
+set(XUNTOS_7FM_VERSION "25d367aeca38fcb13984365d669235a93c25f265")   # Barullo 7FM 0.2.0 sen desprazamentos de negativos (UBSan)
 set(XUNTOS_FM_VERSION "v0.5.0")
 get_filename_component(XUNTOS_IRMANS "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 if(NOT XUNTOS_MOTORES AND EXISTS "${XUNTOS_IRMANS}/barullo-xuno/Source/xuno" AND EXISTS "${XUNTOS_IRMANS}/barullo7fm/Source/Synth7.h"
@@ -58,7 +58,7 @@ if(NOT XUNTOS_MOTORES)
   FetchContent_Declare(barullo_xuno GIT_REPOSITORY https://github.com/callejodev-dotcom/barullo-xuno.git
                        GIT_TAG ${XUNTOS_XUNO_VERSION} SOURCE_DIR "${XUNTOS_MOTORES}/barullo-xuno" SOURCE_SUBDIR sen-cmake)
   FetchContent_Declare(barullo_7fm GIT_REPOSITORY https://github.com/callejodev-dotcom/barullo7fm.git
-                       GIT_TAG ${XUNTOS_7FM_VERSION} GIT_SHALLOW TRUE SOURCE_DIR "${XUNTOS_MOTORES}/barullo7fm" SOURCE_SUBDIR sen-cmake)
+                       GIT_TAG ${XUNTOS_7FM_VERSION} SOURCE_DIR "${XUNTOS_MOTORES}/barullo7fm" SOURCE_SUBDIR sen-cmake)
   FetchContent_Declare(barullo_fm GIT_REPOSITORY https://github.com/callejodev-dotcom/barullofm.git
                        GIT_TAG ${XUNTOS_FM_VERSION} GIT_SHALLOW TRUE SOURCE_DIR "${XUNTOS_MOTORES}/barullofm" SOURCE_SUBDIR sen-cmake)
   FetchContent_MakeAvailable(barullo_xuno barullo_7fm barullo_fm)

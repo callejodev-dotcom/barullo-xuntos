@@ -147,6 +147,7 @@ namespace ui
         SoundEditor (BXTProcessor&, MainView&);
         void open (int layer);
         int layer() const { return k; }
+        int engine() const { return tipo; }
         void paint (juce::Graphics&) override;
         void resized() override;
         void refresh();   // os valores desde o son (despois de desfacer, restaurar…)

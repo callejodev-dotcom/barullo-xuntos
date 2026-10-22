@@ -911,6 +911,7 @@ void MainView::timerCallback()
 {
     const auto ch = proc.cambios.load();
     if (ch != seenChanges) { seenChanges = ch; refreshAll(); }
+    else if (editor.isVisible() && editor.engine() != proc.tipoCapa (editor.layer())) editor.refresh();   // a capa cambiou de motor
     refreshState();
     for (auto* s : strips) s->tick();
     zones.repaint();

@@ -44,7 +44,7 @@ Avisan porque os instaladores non levan sinatura de pago, non porque haxa nada r
 
 ## Como se fixo
 
-- **Os motores son os dos plugins**, sen copialos: o CMake descarga cada un do seu repo nunha versión fixada (Barullo Xuno, Barullo 7FM v0.2.0, Barullo FM v0.5.0). Se mellora un motor, Barullo Xuntos mellora ao subir esa versión. Cada un soa coma no seu plugin, cos seus mandos de partida (no Juno, a afinación e o bender; no teclado FM, o ecualizador do altofalante).
+- **Os motores son os dos plugins**, sen copialos: o CMake descarga cada un do seu repo nunha versión fixada (Barullo Xuno e Barullo 7FM nun commit fixado, Barullo FM v0.5.0). Se mellora un motor, Barullo Xuntos mellora ao subir esa versión. Cada un soa coma no seu plugin, cos seus mandos de partida (no Juno, a afinación e o bender; no teclado FM, o ecualizador do altofalante).
 - **Unha capa** (`Source/motores/Motor.h`) ve calquera motor igual: notas, pedal, bend, roda, o son e as edicións. As notas entran na súa mostra exacta. A afinación fina vai polo mando de afinación do Juno e, no DX7 e no teclado FM, polo bend. No DX7 vai en pasos de 1/64 do alcance do bend: uns 5 cents co alcance de partida (2 semitóns).
 - **Os sons** van no formato de cada motor (os 18 bytes do Juno-106, os 155 do DX7, os rexistros do chip). O editor cambia eses bytes e ao motor só lle chegan os que cambian.
 - **Os tres soan parecido de forte**: medido cos acordes dos sons de cada banco (`BXTRenderTest --niveis`), o DX7 vai +5 dB e o teclado FM −0,9 dB.
