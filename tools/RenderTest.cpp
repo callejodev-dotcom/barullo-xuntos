@@ -5,6 +5,10 @@
 //   BXTRenderTest --snapshot saida.png [capa a editar]
 //   BXTRenderTest --render saida.wav [combinación]    unha combinación: un acorde e unha frase
 //   BXTRenderTest --niveis                            a sonoridade dos primeiros sons de cada motor
+//   BXTRenderTest --combinacions saida.json           as combinacións (para a web: escoita.link/ferramentas/xuntos)
+//   BXTRenderTest --demo combinación notas.txt saida.wav
+//       unha combinación tocando unhas notas («fin_ms» e despois «ms on|off nota [velocidade]»),
+//       coa altura igualada (pico a −4,4 dBFS) e sen o silencio do final: as demos da web
 #include <juce_audio_formats/juce_audio_formats.h>
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
@@ -169,6 +173,66 @@ int main (int argc, char** argv)
         const int frase[] = { 60, 62, 64, 67, 69, 67, 64, 62, 60, 55, 48, 36 };
         for (int i = 0; i < 12; ++i) { seq.push_back ({ 2.4 + i * 0.3, 0, frase[i], 60 + i * 5 }); seq.push_back ({ 2.4 + i * 0.3 + 0.26, 1, frase[i], 0 }); }
         writeWav (juce::File (juce::String (argv[2])), play (p, seq, 8.5, 512, sr), sr);
+        return 0;
+    }
+
+    if (mode == "--combinacions" && argc > 2)
+    {
+        BXTProcessor p;
+        juce::Array<juce::var> lista;
+        for (int i = 0; i < xuntos::NUM_COMBINACIONS; ++i)
+        {
+            p.cargarCombinacion (i);
+            auto* c = new juce::DynamicObject();
+            c->setProperty ("n", U (xuntos::COMBINACIONS[i].nome));
+            c->setProperty ("d", U (xuntos::COMBINACIONS[i].descricion));
+            juce::Array<juce::var> capas;
+            for (int k = 0; k < BXTProcessor::CAPAS; ++k)
+            {
+                if (! p.capaAcesa (k)) continue;
+                const int t = p.tipoCapa (k);
+                auto val = [&p, k] (const char* nome) { return (int) std::lround (p.apvts.getRawParameterValue (BXTProcessor::id (k, nome))->load()); };
+                auto* cp = new juce::DynamicObject();
+                cp->setProperty ("capa", k + 1);
+                cp->setProperty ("motor", xuntos::fabrica (t).nome);
+                cp->setProperty ("banco", p.bancoSon (k, t));
+                cp->setProperty ("son", p.nomeSon (k, t));
+                cp->setProperty ("desc", p.descricionSon (k, t));
+                cp->setProperty ("nb", val ("notaBaixa")); cp->setProperty ("na", val ("notaAlta"));
+                cp->setProperty ("vb", val ("velBaixa")); cp->setProperty ("va", val ("velAlta"));
+                cp->setProperty ("tr", 12 * val ("oitava") + val ("semitons"));
+                capas.add (juce::var (cp));
+            }
+            c->setProperty ("capas", capas);
+            lista.add (juce::var (c));
+        }
+        juce::File (juce::String (argv[2])).replaceWithText (juce::JSON::toString (juce::var (lista), false));
+        std::printf ("JSON: %s (%d combinacións)\n", argv[2], xuntos::NUM_COMBINACIONS);
+        return 0;
+    }
+
+    if (mode == "--demo" && argc > 4)
+    {
+        BXTProcessor p;
+        p.cargarCombinacion (atoi (argv[2]));
+        juce::StringArray linas;
+        linas.addLines (juce::File (juce::String (argv[3])).loadFileAsString());
+        if (linas.isEmpty()) { std::printf ("sen notas: %s\n", argv[3]); return 1; }
+        const double fin = linas[0].getDoubleValue() / 1000.0;
+        std::vector<Ev> seq;
+        for (int i = 1; i < linas.size(); ++i)
+        {
+            const auto t = juce::StringArray::fromTokens (linas[i], " ", "");
+            if (t.size() < 3) continue;
+            seq.push_back ({ t[0].getDoubleValue() / 1000.0, t[1] == "on" ? 0 : 1, t[2].getIntValue(), t.size() > 3 ? t[3].getIntValue() : 100 });
+        }
+        auto o = play (p, seq, fin + 4.0, 512, sr);   // 4 s de máis para as colas e a reverb; despois recórtase
+        const float pk = pico (o);
+        if (pk > 0) o.applyGain (0.6f / pk);
+        int ultimo = o.getNumSamples();
+        while (ultimo > 0 && std::abs (o.getSample (0, ultimo - 1)) < 0.0006f && std::abs (o.getSample (1, ultimo - 1)) < 0.0006f) --ultimo;
+        o.setSize (2, juce::jmin (o.getNumSamples(), ultimo + (int) (0.15 * sr)), true);
+        writeWav (juce::File (juce::String (argv[4])), o, sr);
         return 0;
     }
 
