@@ -107,7 +107,7 @@ public:
             linas[(size_t) i].escribir ((float) (s[(size_t) i] - k + entrada * 0.35));
             if (i & 1) sr += s[(size_t) i] * ((i & 2) ? -1.0 : 1.0); else sl += s[(size_t) i] * ((i & 4) ? -1.0 : 1.0);
         }
-        l = (float) (sl * 0.5); r = (float) (sr * 0.5);
+        l = (float) (sl * 2.0); r = (float) (sr * 2.0);   // co ruído continuo, a cola sae uns 3 dB por debaixo do que entra (tamaño 0,45)
     }
 
 private:

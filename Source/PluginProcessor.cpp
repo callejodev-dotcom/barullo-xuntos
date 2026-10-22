@@ -8,6 +8,10 @@ namespace
 {
     // o eco á par do DAW: cantas negras dura cada figura
     constexpr double RITMOS[9] = { 0, 0.25, 1.0 / 3.0, 0.5, 0.75, 2.0 / 3.0, 1.0, 1.5, 2.0 };
+    // marxe da mestura: cada motor vén co volume do seu plugin, e as capas súmanse (dúas iguais xa
+    // son +6 dB). Con −6 dB, un acorde forte de sete notas en calquera combinación queda por debaixo
+    // de −6 dBFS: o limitador só traballa cando se lle pide moito (dez dedos, forte e co pedal).
+    constexpr double MESTURA = 0.5;
 }
 
 BXTProcessor::BXTProcessor()
@@ -551,7 +555,7 @@ void BXTProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuf
     {
         auto& c = capas[(size_t) k];
         if (c.tipo < 0) { vocesCapa[(size_t) k].store (0); nivelCapa[(size_t) k].store (0); c.gL = c.gR = 0; continue; }
-        const double g = juce::Decibels::decibelsToGain ((double) c.volume->load(), -59.9) * xuntos::fabrica (c.tipo).ganancia;
+        const double g = juce::Decibels::decibelsToGain ((double) c.volume->load(), -59.9) * xuntos::fabrica (c.tipo).ganancia * MESTURA;
         const double p = c.pan->load();
         const double tL = g * (p > 0 ? 1.0 - p : 1.0), tR = g * (p < 0 ? 1.0 + p : 1.0);
         const float er = c.envioRev->load(), ee = c.envioEco->load();

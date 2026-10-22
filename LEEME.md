@@ -48,6 +48,7 @@ Avisan porque os instaladores non levan sinatura de pago, non porque haxa nada r
 - **Unha capa** (`Source/motores/Motor.h`) ve calquera motor igual: notas, pedal, bend, roda, o son e as edicións. As notas entran na súa mostra exacta. A afinación fina vai polo mando de afinación do Juno e, no DX7 e no teclado FM, polo bend. No DX7 vai en pasos de 1/64 do alcance do bend: uns 5 cents co alcance de partida (2 semitóns).
 - **Os sons** van no formato de cada motor (os 18 bytes do Juno-106, os 155 do DX7, os rexistros do chip). O editor cambia eses bytes e ao motor só lle chegan os que cambian.
 - **Os tres soan parecido de forte**: medido cos acordes dos sons de cada banco (`BXTRenderTest --niveis`), o DX7 vai +5 dB e o teclado FM −0,9 dB.
+- **As capas súmanse**: dúas iguais xa son +6 dB, así que a mestura leva 6 dB de marxe e as combinacións están igualadas entre elas (`BXTRenderTest --picos`). Un acorde de dez notas a toda forza en calquera combinación queda por debaixo de −4 dBFS: o limitador é de seguridade e non chega a traballar.
 - **A reverb** é unha rede de oito liñas de atraso realimentadas cunha matriz de Householder, con difusión na entrada, un filtro de agudos en cada liña e dúas liñas que se moven moi pouco para que non soe metálica. **O eco**, dous atrasos de ata 2 s con realimentación filtrada e cruzado (`Source/Efectos.h`).
 
 ## Estrutura
@@ -74,6 +75,7 @@ Usa o núcleo común de Escoita ([escoita-nucleo](https://github.com/callejodev-
 - **Estado, A/B, presets e desfacer**: os parámetros e os sons gárdanse e recupéranse e soan igual.
 - **As 16 combinacións** soan.
 - **Efectos**: o eco cae no seu tempo; a reverb apágase.
+- **Marxe**: un acorde de dez notas a toda forza, en cada combinación, non chega ao teito.
 - **Limitador**: catro capas a +6 dB e un acorde forte non pasan de −1 dBFS.
 - **Validación**: pluginval ao nivel máximo (10), auval no Mac e clap-validator.
 

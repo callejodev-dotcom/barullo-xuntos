@@ -226,6 +226,13 @@ int main (int argc, char** argv)
             if (t.size() < 3) continue;
             seq.push_back ({ t[0].getDoubleValue() / 1000.0, t[1] == "on" ? 0 : 1, t[2].getIntValue(), t.size() > 3 ? t[3].getIntValue() : 100 });
         }
+        if (argc > 5 && juce::String (argv[5]) == "--pico")   // o pico antes do limitador (co volume xeral a −30 dB)
+        {
+            setParam (p, "volume", -30.0f);
+            const auto o = play (p, seq, fin + 4.0, 512, sr);
+            std::printf ("%-20s pico %+5.1f dBFS\n", xuntos::COMBINACIONS[atoi (argv[2])].nome, juce::Decibels::gainToDecibels (pico (o)) + 30.0);
+            return 0;
+        }
         auto o = play (p, seq, fin + 4.0, 512, sr);   // 4 s de máis para as colas e a reverb; despois recórtase
         const float pk = pico (o);
         if (pk > 0) o.applyGain (0.6f / pk);
@@ -233,6 +240,28 @@ int main (int argc, char** argv)
         while (ultimo > 0 && std::abs (o.getSample (0, ultimo - 1)) < 0.0006f && std::abs (o.getSample (1, ultimo - 1)) < 0.0006f) --ultimo;
         o.setSize (2, juce::jmin (o.getNumSamples(), ultimo + (int) (0.15 * sr)), true);
         writeWav (juce::File (juce::String (argv[4])), o, sr);
+        return 0;
+    }
+
+    if (mode == "--picos")   // o pico e a sonoridade de cada combinación antes do limitador (co volume xeral a −30 dB)
+    {
+        for (int i = 0; i < xuntos::NUM_COMBINACIONS; ++i)
+        {
+            std::vector<Ev> s;
+            for (int nn : { 36, 48, 55, 60, 64, 67, 72 }) { s.push_back ({ 0.02, 0, nn, 110 }); s.push_back ({ 1.5, 1, nn, 0 }); }
+            auto medir = [&] (bool efectos)
+            {
+                BXTProcessor p;
+                p.cargarCombinacion (i);
+                setParam (p, "volume", -30.0f);
+                if (! efectos) { setParam (p, "revVolume", 0.0f); setParam (p, "ecoVolume", 0.0f); }
+                return play (p, s, 3.5, 512, sr);
+            };
+            const auto o = medir (true), seco = medir (false);
+            std::printf ("%2d %-20s pico %+5.1f dBFS  sonoridade %+5.1f dB (seco %+5.1f dB; cola %+5.1f dB)\n", i, xuntos::COMBINACIONS[i].nome,
+                         juce::Decibels::gainToDecibels (pico (o)) + 30.0, sonoridade (o, sr) + 30.0, sonoridade (seco, sr) + 30.0,
+                         juce::Decibels::gainToDecibels (o.getRMSLevel (0, (int) (2.0 * sr), (int) (1.0 * sr))) + 30.0);
+        }
         return 0;
     }
 
@@ -450,6 +479,21 @@ int main (int argc, char** argv)
         const double caida = 10.0 * std::log10 ((tarde + 1e-30) / (cedo + 1e-30));
         check (std::abs (onde - (int) (0.25 * sr)) <= 1 && caida < -40.0 && cedo > 1e-4, "eco no seu tempo e reverb que se apaga",
                juce::String::formatted ("(%d mostras; %.0f dB)", onde, caida));
+    }
+    {   // marxe: as capas súmanse, pero un acorde de dez notas a toda forza en calquera combinación
+        // queda por debaixo do teito (o limitador é de seguridade, non parte do son)
+        float peor = -100; int cal = 0;
+        for (int i = 0; i < xuntos::NUM_COMBINACIONS; ++i)
+        {
+            BXTProcessor p;
+            p.cargarCombinacion (i);
+            setParam (p, "volume", -30.0f);
+            std::vector<Ev> s;
+            for (int nn : { 36, 43, 48, 52, 55, 60, 64, 67, 72, 76 }) { s.push_back ({ 0.02, 0, nn, 127 }); s.push_back ({ 1.5, 1, nn, 0 }); }
+            const float pk = juce::Decibels::gainToDecibels (pico (play (p, s, 2.5, 512, sr))) + 30.0f;
+            if (pk > peor) { peor = pk; cal = i; }
+        }
+        check (peor < -1.0f, "marxe: dez notas a toda forza sen tocar o teito", U ("(a máis alta, ") + U (xuntos::COMBINACIONS[cal].nome) + juce::String::formatted (": %.1f dBFS)", peor));
     }
     {   // o limitador do núcleo: catro capas a +6 dB e un acorde forte non pasan de −1 dBFS
         BXTProcessor p;
