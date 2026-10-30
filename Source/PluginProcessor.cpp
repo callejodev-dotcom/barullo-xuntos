@@ -420,7 +420,6 @@ bool BXTProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 void BXTProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     sr = sampleRate;
-    setLatencySamples (0);
     const size_t n = (size_t) juce::jmax (1, samplesPerBlock);
     for (auto& c : capas)
     {
@@ -435,7 +434,8 @@ void BXTProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     revL.assign (n, 0.0f); revR.assign (n, 0.0f); ecoL.assign (n, 0.0f); ecoR.assign (n, 0.0f);
     reverb.preparar (sampleRate);
     eco.preparar (sampleRate);
-    teito.preparar (sampleRate, 0.080, 0.891);
+    teito.preparar (sampleRate, 0.080, 0.891, 0.0015);
+    setLatencySamples (teito.latencia());   // os motores non teñen latencia; só o teito mira 1,5 ms por diante
     volS = juce::Decibels::decibelsToGain ((double) volumeParam->load());
     keyboardState.reset();
 }
@@ -574,7 +574,7 @@ void BXTProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuf
         nivelCapa[(size_t) k].store (pico);
     }
 
-    // os efectos, o volume e o limitador de seguridade do núcleo (teito a −1 dBFS, sen latencia)
+    // os efectos, o volume e o limitador de seguridade do núcleo (teito a −1 dBFS, con 1,5 ms de anticipación)
     const double volT = juce::Decibels::decibelsToGain ((double) volumeParam->load());
     const float rv = revVol->load(), ev = ecoVol->load();
     float pico = 0;

@@ -234,6 +234,12 @@ int main (int argc, char** argv)
             return 0;
         }
         auto o = play (p, seq, fin + 4.0, 512, sr);   // 4 s de máis para as colas e a reverb; despois recórtase
+        {   // sen a latencia do teito: a demo empeza coas notas
+            const int lat = p.getLatencySamples();
+            juce::AudioBuffer<float> sen (2, o.getNumSamples() - lat);
+            for (int c = 0; c < 2; ++c) sen.copyFrom (c, 0, o, c, lat, sen.getNumSamples());
+            o = std::move (sen);
+        }
         const float pk = pico (o);
         if (pk > 0) o.applyGain (0.6f / pk);
         int ultimo = o.getNumSamples();
@@ -503,7 +509,8 @@ int main (int argc, char** argv)
         std::vector<Ev> s;
         for (int n : { 36, 43, 48, 52, 55, 60, 64, 67, 72 }) s.push_back ({ 0.02, 0, n, 127 });
         const float pk = pico (play (p, s, 1.5, 512, sr));
-        check (pk <= 0.8913f, "teito a -1 dBFS", juce::String::formatted ("(pico %.4f)", pk));
+        check (pk <= 0.8913f && p.getLatencySamples() == 72, "teito a -1 dBFS, con 1,5 ms de anticipación",
+               juce::String::formatted ("(pico %.4f; latencia %d)", pk, p.getLatencySamples()));
     }
     return fails;
 }

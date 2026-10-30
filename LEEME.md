@@ -40,7 +40,7 @@ Avisan porque os instaladores non levan sinatura de pago, non porque haxa nada r
 - **16 combinacións** de fábrica (Balada 84, Piano e cordas, Cristal na néboa, Baixo e teclas, Metais 1984, Muiñeira, Catro capas…). O cambio de programa do MIDI escolle unha.
 - **Presets propios, A/B e desfacer** (do núcleo común): os presets (`.bxtpreset`, en Documentos/Barullo Xuntos/Presets) e o A/B gardan todo, os sons das capas tamén, editados ou non; desfanse os mandos, os sons, as edicións e as combinacións. Cada clic é un paso.
 - **ESCOITAR**: mentres está premido, soa un acorde de Do en todo o teclado, para oír as capas e as zonas sen teclado MIDI.
-- Un **limitador de seguridade** á saída: nunca pasa de −1 dBFS.
+- Un **limitador de seguridade** á saída: nunca pasa de −1 dBFS, e mira 1,5 ms por diante para baixar suave antes dos picos, sen distorsión (esa é a única latencia; o DAW compénsaa só).
 
 ## Como se fixo
 
@@ -64,7 +64,7 @@ Avisan porque os instaladores non levan sinatura de pago, non porque haxa nada r
 | `Source/Plugin*.cpp`, `Source/Editores.cpp` | O plugin, a interface e o editor dos sons |
 | `tools/RenderTest.cpp` | A proba |
 
-Usa o núcleo común de Escoita ([escoita-nucleo](https://github.com/callejodev-dotcom/escoita-nucleo), v0.3.0): o texto en galego, o aviso das versións novas, os presets propios, o A/B e o desfacer (`escoita::Estado`; os sons das capas van coma estado propio), o limitador de seguridade (`escoita::Teito`), a CI e os instaladores. O pedal e o reparto das voces son os de cada motor, coma nos seus plugins.
+Usa o núcleo común de Escoita ([escoita-nucleo](https://github.com/callejodev-dotcom/escoita-nucleo), v0.5.0): o texto en galego, o aviso das versións novas, os presets propios, o A/B e o desfacer (`escoita::Estado`; os sons das capas van coma estado propio), o limitador de seguridade (`escoita::Teito`), a CI e os instaladores. O pedal e o reparto das voces son os de cada motor, coma nos seus plugins.
 
 ## Probas
 
@@ -76,7 +76,7 @@ Usa o núcleo común de Escoita ([escoita-nucleo](https://github.com/callejodev-
 - **As 16 combinacións** soan.
 - **Efectos**: o eco cae no seu tempo; a reverb apágase.
 - **Marxe**: un acorde de dez notas a toda forza, en cada combinación, non chega ao teito.
-- **Limitador**: catro capas a +6 dB e un acorde forte non pasan de −1 dBFS.
+- **Limitador**: catro capas a +6 dB e un acorde forte non pasan de −1 dBFS; a latencia é a do teito (1,5 ms).
 - **Validación**: pluginval ao nivel máximo (10), auval no Mac e clap-validator.
 
 Na CI van en Mac, Windows e Linux, e tamén con AddressSanitizer e UBSan (`tools/probas-ci.sh`).
