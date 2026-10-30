@@ -2,6 +2,11 @@
 
 Unha ferramenta de [Escoita](https://www.escoita.link).
 
+## Novidades na 0.1.1
+
+- **Limitador de seguridade novo**: mira 1,5 ms por diante e baixa suave antes do pico, en vez de achatalo. Aínda que o son vaia moi forte, xa non soa a clip. O DAW compensa só eses 1,5 ms (a latencia que declara o plugin).
+- Tocando en directo, son 1,5 ms máis (non se nota).
+
 ## Novidades na 0.1.0
 
 - A primeira versión: catro capas cos tres motores e todos os seus sons (e os .syx de Juno-106 e de DX7), zonas do teclado e da velocidade, canle MIDI, oitava, semitóns, afinación fina, panorama e envíos.
